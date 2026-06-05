@@ -127,6 +127,38 @@ async def execute(args: dict):
     yield json.dumps({"step": 2, "message": "分析完成", "result": "..."})
 ```
 
+### 返回带元数据的结果
+
+如果 Tool 需要同时返回 LLM 可读文本和 UI 展示数据（HTML、图表、档案等），使用 `ToolResult` 对象替代纯字符串：
+
+```python
+from mh_service_kit import ToolResult
+
+def execute(args: dict) -> ToolResult:
+    result_text = json.dumps({"status": "ok", "city": args["city"]})
+    return ToolResult(
+        content=result_text,     # 进入 LLM 上下文
+        meta={
+            "html": "<div class='weather-card'>...</div>",
+            "chart_data": {"labels": ["周一","周二"], "values": [22, 25]},
+        },
+    )
+```
+
+- `content`：语义结果，进入 LLM 上下文，LLM 基于此生成回复
+- `meta`：UI / 可视化元数据，随 SSE 事件下发但不进入 LLM 上下文，不会消耗上下文窗口
+
+流式 handler 也可以在最后 yield `ToolResult`：
+
+```python
+async def execute(args: dict):
+    yield json.dumps({"step": 1, "message": "正在获取数据..."})
+    yield ToolResult(
+        content="找到 3 份档案：Alice、Bob、Charlie",
+        meta={"profiles": [...], "html": "..."},
+    )
+```
+
 ### 访问 HTTP 请求上下文
 
 handler 声明 `context` 参数即可接收 `ToolContext`，包含原始请求的 header：

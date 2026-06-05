@@ -91,6 +91,45 @@ def execute(args: dict, context: ToolContext) -> str:
     return json.dumps({"result": "ok"})
 ```
 
+### 2.4b Returning Metadata with Results (`ToolResult`)
+
+To return UI data (HTML, charts, profiles) alongside the LLM-facing text, use `ToolResult` instead of a plain string:
+
+```python
+from mh_service_kit import ToolResult
+
+def execute(args: dict) -> ToolResult:
+    result_text = json.dumps({"status": "ok", "city": args["city"]})
+    return ToolResult(
+        content=result_text,          # goes into LLM context
+        meta={
+            "html": "<div class='weather-card'>...</div>",
+            "chart_data": {"labels": ["Mon","Tue"], "values": [22, 25]},
+        },
+    )
+```
+
+Design contract:
+- `content` (`Any`): Semantic payload — included in the LLM conversation context
+- `meta` (`dict | None`): Arbitrary UI/viz data — serialized as `__meta` in SSE `tool_end` events, but **never** included in the LLM context window
+
+Streaming handlers can yield `ToolResult` as the final event:
+
+```python
+async def execute(args: dict):
+    yield json.dumps({"step": 1, "message": "Fetching data..."})
+    yield ToolResult(
+        content="3 profiles found: Alice, Bob, Charlie",
+        meta={"profiles": [...], "html": "..."},
+    )
+```
+
+SSE wire format when `ToolResult` is returned:
+
+```
+data: {"type":"tool_end","data":{"content":"...","__meta":{...}}}
+```
+
 ### 2.5 Registration
 
 ```python

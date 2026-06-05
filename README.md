@@ -137,6 +137,37 @@ async def execute(args: dict):
     yield json.dumps({"step": 2, "message": "Analysis complete", "result": ...})
 ```
 
+### Returning metadata with results
+
+When a tool needs to return UI data (HTML, charts, profiles) alongside the LLM-facing text, use `ToolResult` instead of a plain string:
+
+```python
+from mh_service_kit import ToolResult
+
+def execute(args: dict) -> ToolResult:
+    result_text = json.dumps({"status": "ok", "city": args["city"]})
+    return ToolResult(
+        content=result_text,          # goes into LLM context
+        meta={
+            "html": "<div class='weather-card'>...</div>",
+            "chart_data": {"labels": ["Mon","Tue"], "values": [22, 25]},
+        },
+    )
+```
+
+`content` is the semantic payload consumed by the LLM. `meta` holds arbitrary UI/viz data — it is preserved in SSE events but never included in the LLM context window.
+
+Streaming handlers can also yield `ToolResult` as the final result:
+
+```python
+async def execute(args: dict):
+    yield json.dumps({"step": 1, "message": "Fetching data..."})
+    yield ToolResult(
+        content="3 profiles found: Alice, Bob, Charlie",
+        meta={"profiles": [...], "html": "..."},
+    )
+```
+
 ### Using `parameters_from_model()` directly
 
 You can also convert a model manually and pass the dict as `parameters`:
