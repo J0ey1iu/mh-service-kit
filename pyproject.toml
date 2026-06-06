@@ -1,6 +1,6 @@
 [project]
 name = "mh-service-kit"
-version = "0.1.0b2"
+version = "0.1.0b4"
 description = "SDK for building standalone agent & tool services in the minimal-harness ecosystem"
 requires-python = ">=3.12"
 dependencies = [
