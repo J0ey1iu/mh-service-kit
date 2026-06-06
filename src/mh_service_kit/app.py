@@ -5,7 +5,7 @@ import logging
 from collections.abc import AsyncGenerator
 from typing import Any, Callable
 
-from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, StreamingResponse
 from minimal_harness.client.logging_setup import setup_service_logging
@@ -24,6 +24,7 @@ from mh_service_kit.models import (
     validate_args,
 )
 from mh_service_kit.playground import PLAYGROUND_HTML
+from mh_service_kit.m2m_auth import M2MAuthProvider, _DefaultM2MAuthProvider
 from mh_service_kit.sse import sse_line
 
 logger = logging.getLogger(__name__)
@@ -42,6 +43,7 @@ class ServiceApp:
         runner: Any | None = None,
         llm_api_key: str = "",
         llm_base_url: str = "",
+        m2m_auth_provider: M2MAuthProvider | None = None,
     ):
         self._title = title
         self._version = version
@@ -52,6 +54,7 @@ class ServiceApp:
         self._runner = runner
         self._llm_api_key = llm_api_key
         self._llm_base_url = llm_base_url
+        self._m2m_auth_provider = m2m_auth_provider
 
         self._agents: dict[str, dict[str, Any]] = {}
         self._tools: dict[str, dict[str, Any]] = {}
@@ -158,6 +161,15 @@ class ServiceApp:
         resolve = resolve_locale
         default_locale = self._default_locale
         resolve_runner = self._resolve_runner
+        m2m_provider = self._m2m_auth_provider or _DefaultM2MAuthProvider()
+
+        async def verify_m2m(request: Request) -> str:
+            app_id = await m2m_provider.authenticate(request)
+            if app_id is None:
+                raise HTTPException(
+                    status_code=401, detail="M2M authentication required"
+                )
+            return app_id
 
         # ── GET /agents ─────────────────────────────────────────────
 
@@ -217,6 +229,7 @@ class ServiceApp:
         async def run_agent(
             agent_name: str,
             body: AgentRunRequest,
+            _app_id: str = Depends(verify_m2m),
             accept_language: str | None = Header(None, alias="Accept-Language"),
         ):
             logger.debug(
@@ -273,6 +286,7 @@ class ServiceApp:
             tool_name: str,
             body: ToolExecuteRequest,
             request: Request,
+            _app_id: str = Depends(verify_m2m),
         ):
             logger.debug(
                 "INBOUND POST /tools/%s/execute — args_keys=%s",

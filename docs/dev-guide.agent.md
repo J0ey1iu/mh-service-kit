@@ -260,6 +260,7 @@ ServiceApp(
     llm_base_url: str = "",
     llm_client: AsyncOpenAI | None = None,          # custom client (overrides key/url)
     runner: Any | None = None,                      # custom SSEAgentRunner
+    m2m_auth_provider: M2MAuthProvider | None = None, # M2M auth for POST endpoints
 )
 ```
 
@@ -298,7 +299,43 @@ service.add_agent(
 
 ---
 
-## 6. Complete Example
+## 6. M2M Authentication
+
+`POST /agent/{name}/run` and `POST /tools/{name}/execute` are M2M endpoints called by the orchestration layer. Protect them with `M2MAuthProvider`.
+
+### 6.1 Protocol
+
+```python
+from mh_service_kit import M2MAuthProvider
+
+
+class MyM2MAuth:
+    async def authenticate(self, request) -> str | None:
+        """Verify M2M caller identity. Return app_id or None → 401."""
+        ...
+
+    async def close(self) -> None:
+        """Release resources."""
+        ...
+```
+
+### 6.2 Injection
+
+```python
+from mh_service_kit import ServiceApp
+
+service = ServiceApp(
+    m2m_auth_provider=MyM2MAuth(),
+    ...
+)
+app = service.build()
+```
+
+When `m2m_auth_provider` is `None` (default), POST endpoints are open — backward compatible for dev setups. When set, every POST to `/agent/{name}/run` or `/tools/{name}/execute` is authenticated.
+
+---
+
+## 7. Complete Example
 
 ```python
 # main.py
@@ -335,7 +372,7 @@ Start with `uvicorn main:app --port 8003`.
 
 ---
 
-## 7. LLM Runner Internals
+## 8. LLM Runner Internals
 
 The SDK uses `SSEAgentRunner` from `minimal_harness.agent.runner` to drive LLM conversations. It is lazily initialized via `get_runner()` singleton pattern.
 

@@ -294,6 +294,7 @@ TOOL = {
 | `llm_base_url` | `str` | `""` | Default LLM base URL |
 | `llm_client` | `AsyncOpenAI \| None` | `None` | Custom OpenAI client (overrides key/url) |
 | `runner` | `Any \| None` | `None` | Custom SSEAgentRunner |
+| `m2m_auth_provider` | `M2MAuthProvider \| None` | `None` | M2M auth provider for POST endpoints |
 
 ### `add_tool()`
 
@@ -319,6 +320,32 @@ TOOL = {
 | `display_name_locale` | `dict | None` | Locale-aware display names |
 | `description_locale` | `dict | None` | Locale-aware descriptions |
 | `system_prompt_locale` | `dict | None` | Locale-aware system prompts |
+
+## M2M authentication
+
+The SDK supports machine-to-machine authentication on `POST /agent/{name}/run` and `POST /tools/{name}/execute` via a pluggable `M2MAuthProvider`.
+
+```python
+from mh_service_kit import M2MAuthProvider, ServiceApp
+
+
+class MyM2MAuth:
+    async def authenticate(self, request) -> str | None:
+        token = request.headers.get("Authorization", "").removeprefix("Bearer ")
+        return await my_token_validator.validate(token)  # app_id or None
+
+    async def close(self) -> None:
+        pass
+
+
+service = ServiceApp(
+    m2m_auth_provider=MyM2MAuth(),
+    ...
+)
+app = service.build()
+```
+
+When `m2m_auth_provider` is `None` (default), POST endpoints are open (backward compatible). When set, `authenticate()` is called on every request — return `None` for 401.
 
 ## Testing
 
