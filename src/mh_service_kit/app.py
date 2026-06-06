@@ -8,11 +8,14 @@ from typing import Any, Callable
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, StreamingResponse
+from minimal_harness.client.logging_setup import setup_service_logging
+from minimal_harness.types import ToolResult
 from openai import AsyncOpenAI
 from pydantic import BaseModel
 
 from mh_service_kit.context import ToolContext
-from mh_service_kit.llm import get_runner, reset as reset_llm
+from mh_service_kit.llm import get_runner
+from mh_service_kit.llm import reset as reset_llm
 from mh_service_kit.locale import parse_locale, resolve_locale
 from mh_service_kit.models import (
     AgentRunRequest,
@@ -22,9 +25,6 @@ from mh_service_kit.models import (
 )
 from mh_service_kit.playground import PLAYGROUND_HTML
 from mh_service_kit.sse import sse_line
-
-from minimal_harness.client.logging_setup import setup_service_logging
-from minimal_harness.types import ToolResult
 
 logger = logging.getLogger(__name__)
 
@@ -364,7 +364,11 @@ class ServiceApp:
                     if isinstance(result, ToolResult):
                         yield sse_line(
                             "tool_end",
-                            {"content": result.content, "__meta": result.meta},
+                            {
+                                "content": result.content,
+                                "__meta": result.meta,
+                                "__stop": result.stop,
+                            },
                         )
                     else:
                         yield sse_line("tool_end", result)
