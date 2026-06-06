@@ -148,6 +148,22 @@ def execute(args: dict) -> ToolResult:
 - `content`：语义结果，进入 LLM 上下文，LLM 基于此生成回复
 - `meta`：UI / 可视化元数据，随 SSE 事件下发但不进入 LLM 上下文，不会消耗上下文窗口
 
+#### 提前终止 Agent 循环
+
+当 Tool 执行完成后不希望 Agent 继续推理时，设置 `stop=True`：
+
+```python
+def execute(args: dict) -> ToolResult:
+    return ToolResult(
+        content=f"订单 {args['order_id']} 已确认，无需后续操作。",
+        stop=True,
+    )
+```
+
+`stop=True` 的效果：
+- Agent 在当前这批 Tool 执行完毕后立即停止循环，不再调用 LLM
+- `ToolResult.content` 作为最终回复返回给用户
+
 流式 handler 也可以在最后 yield `ToolResult`：
 
 ```python
