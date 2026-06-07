@@ -228,39 +228,46 @@ The built FastAPI app automatically exposes:
 
 ### SSE stream protocol
 
-**Tool execution:**
+Every SSE event uses the format `data: {"type":"<event>","data":<payload>}`.
+
+**Tool execution** — events emitted by this SDK (`tool_start` is emitted by the orchestration caller):
 
 ```
-data: {"type":"tool_start",   "tool_call":{"id":"...","function":{"name":"...","arguments":"{...}"}}}
-data: {"type":"tool_progress","content":"..."}                         (0 or more)
-data: {"type":"tool_end",     "tool_call":{"id":"..."},"result":"..."}
+data: {"type":"tool_progress","data":"..."}                            (0 or more; one per handler yield/return)
+data: {"type":"tool_end",     "data":"..."}                            (final result as string)
+```
+
+When the handler returns a `ToolResult`:
+
+```
+data: {"type":"tool_end","data":{"content":"...","__meta":{...},"__stop":false}}
 ```
 
 **On validation error:**
 
 ```
-data: {"type":"tool_end","tool_call":{"id":"..."},"result":"Validation error: ..."}
+data: {"type":"tool_end","data":"Validation error: ..."}
 ```
 
-**Agent run:**
+**Agent run** — events emitted by the LLM runner:
 
 ```
-data: {"type":"agent_start","agent":"...","user_input":[...]}
-data: {"type":"llm_start","config":{...}}
-data: {"type":"llm_chunk","content":"..."}                            (0 or more)
-data: {"type":"llm_end","content":"...","error":null}
-data: {"type":"execution_start","tool_calls":[...]}                   (if tool calls)
-data: {"type":"tool_progress","content":"..."}                        (per tool call)
-data: {"type":"execution_end","results":[...],"error":null}
-data: {"type":"agent_end","response":"...","error":null}
+data: {"type":"agent_start",     "data":{"agent":"...","user_input":[...]}}
+data: {"type":"llm_start",       "data":{"config":{...}}}
+data: {"type":"llm_chunk",       "data":{"content":"..."}}             (0 or more)
+data: {"type":"llm_end",         "data":{"content":"...","error":null}}
+data: {"type":"execution_start", "data":{"tool_calls":[...]}}          (if tool calls)
+data: {"type":"tool_progress",   "data":"..."}                        (per tool call)
+data: {"type":"execution_end",   "data":{"results":[...],"error":null}}
+data: {"type":"agent_end",       "data":{"response":"...","error":null}}
 ```
 
 ### Validation errors
 
-When a tool request fails parameter validation, the SDK returns a `tool_end` SSE event with `result` prefixed by `Validation error:`.
+When a tool request fails parameter validation, the SDK returns a `tool_end` SSE event with the error message prefixed by `Validation error:`.
 
 ```json
-{"type":"tool_end","tool_call":{"id":""},"result":"Validation error: 1 validation error for WeatherParams\ncity\n  Field required [type=missing, ...]"}
+{"type":"tool_end","data":"Validation error: 1 validation error for WeatherParams\ncity\n  Field required [type=missing, ...]"}
 ```
 
 ## Locale support

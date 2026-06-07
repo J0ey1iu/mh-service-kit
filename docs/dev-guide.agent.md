@@ -127,8 +127,10 @@ async def execute(args: dict):
 SSE wire format when `ToolResult` is returned:
 
 ```
-data: {"type":"tool_end","data":{"content":"...","__meta":{...}}}
+data: {"type":"tool_end","data":{"content":"...","__meta":{...},"__stop":false}}
 ```
+
+Note: `__stop` indicates whether the agent loop should terminate after this tool execution, and `__meta` is `null` (serialized as `null`) when not set.
 
 ### 2.5 Registration
 
@@ -147,16 +149,23 @@ The `**TOOL` unpacking passes `params_model`, `name`, `display_name`, etc. as ke
 
 ### 2.7 Tool SSE Protocol
 
+Events emitted by this SDK (`tool_start` is emitted by the orchestration caller before invoking the tool):
+
 ```
-data: {"type":"tool_start",   "data":{"tool_call":{"id":"...","function":{"name":"...","arguments":"{...}"}}}}
-data: {"type":"tool_progress","data":"..."}         (0+ times for streaming handlers)
-data: {"type":"tool_end",     "data":{"tool_call":{"id":"..."},"result":"..."}}
+data: {"type":"tool_progress","data":"..."}          (0+ times for streaming handlers; one for sync/async)
+data: {"type":"tool_end",     "data":"..."}           (final result as string)
+```
+
+When the handler returns `ToolResult`:
+
+```
+data: {"type":"tool_end","data":{"content":"...","__meta":{...},"__stop":false}}
 ```
 
 On validation error:
 
 ```
-data: {"type":"tool_end","data":{"tool_call":{"id":""},"result":"Validation error: ..."}}
+data: {"type":"tool_end","data":"Validation error: ..."}
 ```
 
 ---
@@ -206,15 +215,17 @@ Fields: `user_input` (`list[dict]`), `tools` (`list[dict]`), `memory` (`list[dic
 
 ### 3.4 Agent SSE Protocol
 
+Events emitted by the LLM runner:
+
 ```
-data: {"type":"agent_start",   "data":{"agent":"...","user_input":[...]}}
-data: {"type":"llm_start",     "data":{"config":{...}}}
-data: {"type":"llm_chunk",     "data":{"content":"..."}}
-data: {"type":"llm_end",       "data":{"content":"...","error":null}}
-data: {"type":"execution_start","data":{"tool_calls":[...]}}   (if tools called)
-data: {"type":"tool_progress", "data":"..."}                    (per tool call)
-data: {"type":"execution_end", "data":{"results":[...],"error":null}}
-data: {"type":"agent_end",     "data":{"response":"...","error":null}}
+data: {"type":"agent_start",     "data":{"agent":"...","user_input":[...]}}
+data: {"type":"llm_start",       "data":{"config":{...}}}
+data: {"type":"llm_chunk",       "data":{"content":"..."}}               (0+ times)
+data: {"type":"llm_end",         "data":{"content":"...","error":null}}
+data: {"type":"execution_start", "data":{"tool_calls":[...]}}            (if tools called)
+data: {"type":"tool_progress",   "data":"..."}                           (per tool call)
+data: {"type":"execution_end",   "data":{"results":[...],"error":null}}
+data: {"type":"agent_end",       "data":{"response":"...","error":null}}
 ```
 
 ### 3.5 System Prompt Locale Resolution

@@ -253,29 +253,38 @@ Agent 端点接收的请求体：
 
 ### Tool 执行
 
+事件由本 SDK 发出（`tool_start` 由编排层在调用前发出）：
+
 ```
-data: {"type":"tool_start",   "data":{"tool_call":{"id":"...","function":{"name":"...","arguments":"{...}"}}}}
-data: {"type":"tool_progress","data":"..."}
-data: {"type":"tool_end",     "data":{"tool_call":{"id":"..."},"result":"..."}}
+data: {"type":"tool_progress","data":"..."}                            (0 或多次；流式 handler 每次 yield 一条)
+data: {"type":"tool_end",     "data":"..."}                            (最终结果)
+```
+
+Handler 返回 `ToolResult` 时：
+
+```
+data: {"type":"tool_end","data":{"content":"...","__meta":{...},"__stop":false}}
 ```
 
 校验失败时：
 
 ```
-data: {"type":"tool_end","data":{"tool_call":{"id":""},"result":"Validation error: ..."}}
+data: {"type":"tool_end","data":"Validation error: ..."}
 ```
 
 ### Agent 运行
 
+事件由 LLM runner 发出：
+
 ```
-data: {"type":"agent_start","data":{"agent":"...","user_input":[...]}}
-data: {"type":"llm_start",  "data":{"config":{...}}}
-data: {"type":"llm_chunk",  "data":{"content":"..."}}
-data: {"type":"llm_end",    "data":{"content":"...","error":null}}
-data: {"type":"execution_start","data":{"tool_calls":[...]}}
-data: {"type":"tool_progress","data":"..."}
-data: {"type":"execution_end","data":{"results":[...],"error":null}}
-data: {"type":"agent_end","data":{"response":"...","error":null}}
+data: {"type":"agent_start",     "data":{"agent":"...","user_input":[...]}}
+data: {"type":"llm_start",       "data":{"config":{...}}}
+data: {"type":"llm_chunk",       "data":{"content":"..."}}              (0 或多次)
+data: {"type":"llm_end",         "data":{"content":"...","error":null}}
+data: {"type":"execution_start", "data":{"tool_calls":[...]}}           (有 Tool 调用时)
+data: {"type":"tool_progress",   "data":"..."}                          (每个 Tool 调用)
+data: {"type":"execution_end",   "data":{"results":[...],"error":null}}
+data: {"type":"agent_end",       "data":{"response":"...","error":null}}
 ```
 
 ---
@@ -314,9 +323,10 @@ Agent 的 `system_prompt_locale` 使得不同语言用户获得对应语言的 s
 | `llm_api_key` | `str` | `""` | LLM API Key |
 | `llm_base_url` | `str` | `""` | LLM 接口地址 |
 | `llm_client` | `AsyncOpenAI \| None` | `None` | 自定义 OpenAI 客户端 |
-| `runner` | `Any` | `None` | 自定义 SSEAgentRunner |
+| `runner` | `Any \| None` | `None` | 自定义 SSEAgentRunner |
+| `m2m_auth_provider` | `M2MAuthProvider \| None` | `None` | M2M 鉴权提供者 |
 
-`llm_api_key` 和 `llm_base_url` 均可通过 `MH_API_KEY` 环境变量覆盖。
+`llm_api_key` 的默认值可通过 `MH_API_KEY` 环境变量覆盖；`llm_base_url` 默认使用 `https://aihubmix.com/v1`。
 
 ### add_tool() 参数
 
