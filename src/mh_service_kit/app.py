@@ -8,7 +8,6 @@ from typing import Any, Callable
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, StreamingResponse
-from minimal_harness.client.logging_setup import setup_service_logging
 from minimal_harness.types import ToolResult
 from openai import AsyncOpenAI
 from pydantic import BaseModel
@@ -17,6 +16,7 @@ from mh_service_kit.context import ToolContext
 from mh_service_kit.llm import get_runner
 from mh_service_kit.llm import reset as reset_llm
 from mh_service_kit.locale import parse_locale, resolve_locale
+from mh_service_kit.logging_setup import setup_service_logging
 from mh_service_kit.models import (
     AgentRunRequest,
     ToolExecuteRequest,

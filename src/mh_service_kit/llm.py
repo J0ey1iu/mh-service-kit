@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from openai import AsyncOpenAI
-from minimal_harness.agent.runner import SSEAgentRunner
+
+from mh_service_kit.sse.agent_runner import SSEAgentRunner
 
 _client: AsyncOpenAI | None = None
 _runner: SSEAgentRunner | None = None
