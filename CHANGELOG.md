@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.0.post1
+
+- feat: add `MH_M2M_BYPASS` environment variable to bypass M2M auth as an escape hatch
+
 ## 0.1.0
 
 - feat: `ServiceApp` factory — register agents and tools, build FastAPI app
