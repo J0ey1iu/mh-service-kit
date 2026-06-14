@@ -6,6 +6,28 @@ Latest version: **0.1.0.post1**
 
 > **开发者指南**：[docs/dev-guide.md](./docs/dev-guide.md)（中文） · [docs/dev-guide.agent.md](./docs/dev-guide.agent.md)（英文，面向 Coding Agent）
 
+## Position in the mh ecosystem
+
+| Package | Role | Repo |
+|---|---|---|
+| [minimal-harness](https://github.com/J0ey1iu/minimal-harness) | Core SDK. This package depends on it and reuses its event types, `RemoteAgentDriver` Protocol, etc. | [J0ey1iu/minimal-harness](https://github.com/J0ey1iu/minimal-harness) |
+| [mh-orchestration-service](https://github.com/J0ey1iu/mh-orchestration-service) | Multi-tenant gateway. Uses `mh-service-kit` to host in-cluster agents (e.g. the dev-mode `triage` agent) and as the SSE client for `RemoteAgentBinding` calls. | [J0ey1iu/mh-orchestration-service](https://github.com/J0ey1iu/mh-orchestration-service) |
+| [mh-tui](https://github.com/J0ey1iu/mh-tui) | Local TUI. The `SSEAgentDriver` produced by `DefaultAgentDriverFactory` is the transport the TUI uses to invoke remote agents. | [J0ey1iu/mh-tui](https://github.com/J0ey1iu/mh-tui) |
+| [agent-tool-service](https://github.com/J0ey1iu/mh-incubator/tree/main/packages/agent-tool-service) | Example service. The canonical demonstration of `ServiceApp` with a dozen tools and three agents. | [J0ey1iu/mh-incubator](https://github.com/J0ey1iu/mh-incubator) |
+| [mh-incubator](https://github.com/J0ey1iu/mh-incubator) | Umbrella workspace wiring every package together. | [J0ey1iu/mh-incubator](https://github.com/J0ey1iu/mh-incubator) |
+
+```
+Layer 3 apps      → mh-tui  · mh-orchestration-service  ·  (your service)
+                          │
+                          ▼
+                     mh-service-kit  ← ServiceApp · SSE engine · 参数校验 · M2M auth
+                          │
+                          ▼
+                     minimal-harness  ← types · Agent runtime · LLM · Memory
+```
+
+If you only need a CLI front-end, use [mh-tui](https://github.com/J0ey1iu/mh-tui). If you need a multi-tenant gateway, use [mh-orchestration-service](https://github.com/J0ey1iu/mh-orchestration-service). If you need a standalone Agent & Tool service, you're in the right place.
+
 ## Installation
 
 ```bash
@@ -375,7 +397,7 @@ uv run pytest packages/agent-tool-service/tests -v
 
 ## Example project
 
-See [`agent-tool-service`](../agent-tool-service/README.md) for a complete working example with multiple agents and tools.
+See [`agent-tool-service`](https://github.com/J0ey1iu/mh-incubator/tree/main/packages/agent-tool-service) (in the [`mh-incubator`](https://github.com/J0ey1iu/mh-incubator) umbrella) for a complete working example with multiple agents and tools.
 
 ## Developer guide
 
