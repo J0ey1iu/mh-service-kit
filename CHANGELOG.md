@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.1a1
+
+- chore: bump `minimal-harness` dependency constraint to `>=0.7.0a1` for pre-release alignment
+
 ## 0.1.0.post1
 
 - feat: add `MH_M2M_BYPASS` environment variable to bypass M2M auth as an escape hatch
