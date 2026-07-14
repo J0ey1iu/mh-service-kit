@@ -385,7 +385,9 @@ Start with `uvicorn main:app --port 8003`.
 
 ## 8. LLM Runner Internals
 
-The SDK uses `SSEAgentRunner` from `minimal_harness.agent.runner` to drive LLM conversations. It is lazily initialized via `get_runner()` singleton pattern.
+The SDK uses `SSEAgentRunner` from `mh_service_kit.sse.agent_runner` to drive LLM conversations. It is lazily initialized via `mh_service_kit.llm.get_runner()` (singleton pattern).
+
+> **Migration note (0.7.0):** `minimal_harness.agent.runner` was removed when the TUI / service-mode wire-protocol code was extracted from `minimal-harness`. The runner now ships in this package as `mh_service_kit.sse.SSEAgentRunner`. Callers that previously did `from minimal_harness.agent.runner import SSEAgentRunner` should now do `from mh_service_kit.sse.agent_runner import SSEAgentRunner`.
 
 To reset singleton (e.g. for test isolation):
 
