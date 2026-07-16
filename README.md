@@ -10,9 +10,9 @@ Latest version: **0.1.1a1**
 
 | Package | Role | Repo |
 |---|---|---|
-| [minimal-harness](https://github.com/J0ey1iu/minimal-harness) | Core SDK. This package depends on it and reuses its event types, `RemoteAgentDriver` Protocol, etc. | [J0ey1iu/minimal-harness](https://github.com/J0ey1iu/minimal-harness) |
-| [mh-orchestration-service](https://github.com/J0ey1iu/mh-orchestration-service) | Multi-tenant gateway. Uses `mh-service-kit` to host in-cluster agents (e.g. the dev-mode `triage` agent) and as the SSE client for `RemoteAgentBinding` calls. | [J0ey1iu/mh-orchestration-service](https://github.com/J0ey1iu/mh-orchestration-service) |
-| [mh-tui](https://github.com/J0ey1iu/mh-tui) | Local TUI. The `SSEAgentDriver` produced by `DefaultAgentDriverFactory` is the transport the TUI uses to invoke remote agents. | [J0ey1iu/mh-tui](https://github.com/J0ey1iu/mh-tui) |
+| [minimal-harness](https://github.com/J0ey1iu/minimal-harness) | Core SDK. This package depends on it and reuses its event types, Protocols, etc. | [J0ey1iu/minimal-harness](https://github.com/J0ey1iu/minimal-harness) |
+| [mh-orchestration-service](https://github.com/J0ey1iu/mh-orchestration-service) | Multi-tenant gateway. Uses `mh-service-kit` to host in-cluster agents and tools. | [J0ey1iu/mh-orchestration-service](https://github.com/J0ey1iu/mh-orchestration-service) |
+| [mh-tui](https://github.com/J0ey1iu/mh-tui) | Local TUI. | [J0ey1iu/mh-tui](https://github.com/J0ey1iu/mh-tui) |
 | [agent-tool-service](https://github.com/J0ey1iu/mh-incubator/tree/main/packages/agent-tool-service) | Example service. The canonical demonstration of `ServiceApp` with a dozen tools and three agents. | [J0ey1iu/mh-incubator](https://github.com/J0ey1iu/mh-incubator) |
 | [mh-incubator](https://github.com/J0ey1iu/mh-incubator) | Umbrella workspace wiring every package together. | [J0ey1iu/mh-incubator](https://github.com/J0ey1iu/mh-incubator) |
 

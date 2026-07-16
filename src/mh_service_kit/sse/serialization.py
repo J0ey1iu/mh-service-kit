@@ -24,8 +24,7 @@ from minimal_harness.types import (
 def serialize_event(event: AgentEvent) -> str:
     """Convert an ``AgentEvent`` to an SSE ``data:`` line.
 
-    Returns ``"data: <json>\\n\\n"`` — the format expected by
-    ``SSEAgentDriver`` and consumed by ``deserialize_event``.
+    Returns ``"data: <json>\\n\\n"`` — the format consumed by ``deserialize_event``.
     """
     d: dict[str, Any] = {}
 
