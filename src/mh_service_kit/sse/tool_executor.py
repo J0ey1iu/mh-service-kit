@@ -111,7 +111,7 @@ class SSEToolExecutor:
 
         try:
             async with httpx.AsyncClient(
-                timeout=self._timeout, verify=self._verify_ssl
+                timeout=self._timeout, trust_env=False, verify=self._verify_ssl
             ) as client:
                 async with client.stream(
                     "POST",
