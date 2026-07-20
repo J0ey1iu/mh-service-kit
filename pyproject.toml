@@ -1,6 +1,6 @@
 [project]
 name = "mh-service-kit"
-version = "0.1.1a1"
+version = "0.1.1a2"
 description = "SDK for building standalone agent & tool services in the minimal-harness ecosystem"
 requires-python = ">=3.12"
 dependencies = [
@@ -8,7 +8,7 @@ dependencies = [
     "uvicorn[standard]>=0.30.0",
     "openai>=1.0.0",
     "pydantic>=2.0.0",
-    "minimal-harness>=0.7.0a1",
+    "minimal-harness==0.7.0a2",
 ]
 
 [build-system]
