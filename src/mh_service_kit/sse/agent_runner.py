@@ -149,7 +149,7 @@ class SSEAgentRunner:
     """Shared agent runner that wraps ``SimpleAgent`` into an SSE event stream.
 
     Emits the full ``AgentEvent`` protocol (including ``MessageEvent``) so that
-    downstream orchestration can collect conversation messages without
+    downstream gateway can collect conversation messages without
     reverse-engineering them from behavioral events.
 
     Each tool in *tools_schema* is expected to carry an ``endpoint_url`` field
