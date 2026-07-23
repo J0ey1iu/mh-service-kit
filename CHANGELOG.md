@@ -1,5 +1,35 @@
 # Change Log
 
+## 0.1.1a5
+
+- chore: aligned pre-release bump with `mh-gateway==0.1.0a5` and
+  `minimal-harness==0.7.0a6` (lockstep release).
+- chore: pin `minimal-harness==0.7.0a6`.
+- refactor: drop the `RemoteAgent` concept and remove
+  `SSEAgentDriver` / `RemoteAgent`; the SSE transport is now
+  exclusively served by the modules re-exported from
+  `mh-service-kit.sse` (round-2 SDK decoupling follow-up).
+- fix: pass `trust_env=False` to the `SSEToolExecutor` `httpx`
+  client so system proxy env vars no longer hijack outbound
+  calls in proxy-enabled environments.
+- chore: update internal references from `orchestration-service`
+  to `mh-gateway`.
+
+## 0.1.1a4
+
+- chore: pre-release bump to align with `minimal-harness==0.7.0a5`
+  no SDK code change.
+
+## 0.1.1a3
+
+- chore: pre-release bump to align with `minimal-harness==0.7.0a4`
+  no SDK code change.
+
+## 0.1.1a2
+
+- chore: pre-release bump to align with `minimal-harness==0.7.0a2`
+  for the round-2 SDK-decoupling distribution.
+
 ## 0.1.1a1
 
 - chore: bump `minimal-harness` dependency constraint to `>=0.7.0a1` for pre-release alignment
