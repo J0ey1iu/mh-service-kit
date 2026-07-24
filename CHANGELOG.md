@@ -1,5 +1,15 @@
 # Change Log
 
+## 0.1.1a7
+
+- chore: bump `minimal-harness` pin from `==0.7.0a7` to `==0.7.0a8`
+  for lockstep pre-release alignment.
+
+## 0.1.1a6
+
+- chore: lockstep pre-release bump with `minimal-harness==0.7.0a8`.
+  No SDK code change.
+
 ## 0.1.1a5
 
 - chore: aligned pre-release bump with `mh-gateway==0.1.0a5` and
