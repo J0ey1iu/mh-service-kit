@@ -14,9 +14,6 @@ import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from minimal_harness.log_utils import CorrelationFilter
-
-
 _FORMAT = "%(asctime)s | %(name)s | %(levelname)-8s | %(message)s"
 _DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -45,6 +42,22 @@ def _resolve_level(level: str | int | None) -> int:
     if isinstance(level, int):
         return level
     return _LOG_LEVEL_MAP.get(level.upper(), logging.INFO)
+
+
+class _CorrelationFilter(logging.Filter):
+    """Prepend ``[corr=<id>]`` to log messages when correlation_id is set."""
+    def filter(self, record: logging.LogRecord) -> bool:
+        try:
+            from minimal_harness.agent.runtime import _current_context
+            ctx = _current_context.get()
+            cid = ctx.get("correlation_id", "")
+            if cid:
+                prefix = f"[corr={cid}] "
+                if not record.msg.startswith(prefix):
+                    record.msg = f"{prefix}{record.msg}"
+        except Exception:
+            pass
+        return True
 
 
 def setup_service_logging(
@@ -77,7 +90,7 @@ def setup_service_logging(
     for name in _NOISY_LOGGERS:
         logging.getLogger(name).setLevel(logging.WARNING)
 
-    root_logger.addFilter(CorrelationFilter())
+    root_logger.addFilter(_CorrelationFilter())
 
     stderr_handler = logging.StreamHandler(sys.stderr)
     stderr_handler.setLevel(resolved_level)
