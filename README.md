@@ -2,7 +2,7 @@
 
 SDK for building standalone agent & tool services in the minimal-harness ecosystem.
 
-Latest version: **0.1.1a2**
+Latest version: **0.1.1**
 
 > **开发者指�?*：[docs/dev-guide.md](./docs/dev-guide.md)（中文） · [docs/dev-guide.agent.md](./docs/dev-guide.agent.md)（英文，面向 Coding Agent�?
 
