@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.1.2a1
+
+- chore: pin `minimal-harness>=0.8.0a1` (lockstep with publish set)
+- docs: repair UTF-8 corruption in README
+
 ## 0.1.1a7
 
 - chore: bump `minimal-harness` pin from `==0.7.0a7` to `==0.7.0a8`
