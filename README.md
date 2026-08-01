@@ -4,7 +4,7 @@ SDK for building standalone agent & tool services in the minimal-harness ecosyst
 
 Latest version: **0.1.1**
 
-> **开发者指�?*：[docs/dev-guide.md](./docs/dev-guide.md)（中文） · [docs/dev-guide.agent.md](./docs/dev-guide.agent.md)（英文，面向 Coding Agent�?
+> **开发者指南**：[docs/dev-guide.md](./docs/dev-guide.md)（中文） · [docs/dev-guide.agent.md](./docs/dev-guide.agent.md)（英文，面向 Coding Agent）
 
 ## Position in the mh ecosystem
 
@@ -17,13 +17,13 @@ Latest version: **0.1.1**
 | [mh-incubator](https://github.com/J0ey1iu/mh-incubator) | Umbrella workspace wiring every package together. | [J0ey1iu/mh-incubator](https://github.com/J0ey1iu/mh-incubator) |
 
 ```
-Layer 3 apps      �?mh-tui  · mh-gateway  ·  (your service)
-                          �?
-                          �?
-                     mh-service-kit  �?ServiceApp · SSE engine · 参数校验 · M2M auth
-                          �?
-                          �?
-                     minimal-harness  �?types · Agent runtime · LLM · Memory
+Layer 3 apps      → mh-tui  · mh-gateway  ·  (your service)
+                          │
+                          │
+                     mh-service-kit  ← ServiceApp · SSE engine · 参数校验 · M2M auth
+                          │
+                          │
+                     minimal-harness  ← types · Agent runtime · LLM · Memory
 ```
 
 If you only need a CLI front-end, use [mh-tui](https://github.com/J0ey1iu/mh-tui). If you need a multi-tenant gateway, use [mh-gateway](https://github.com/J0ey1iu/mh-gateway). If you need a standalone Agent & Tool service, you're in the right place.
@@ -47,7 +47,7 @@ service = ServiceApp(
 
 # Register tools and agents here...
 
-app = service.build()  # �?FastAPI app
+app = service.build()  # → FastAPI app
 ```
 
 Or to run directly:
@@ -84,7 +84,7 @@ TOOL = {
     "display_name": "Weather Query",
     "display_name_locale": {"zh": "天气查询"},
     "description": "Get current weather for a city.",
-    "description_locale": {"zh": "获取某个城市的当前天气�?},
+    "description_locale": {"zh": "获取某个城市的当前天气。"},
     "params_model": WeatherParams,
 }
 
@@ -141,9 +141,9 @@ The SDK supports three handler types:
 |---|---|
 | `def execute(args: dict) -> str` | Sync call, returns result directly |
 | `async def execute(args: dict) -> str` | Async call, `await` the result |
-| `async def execute(args: dict) -> AsyncGenerator[str, None]` | Async generator, each `yield` �?`tool_progress` SSE, last yield �?`tool_end` result |
+| `async def execute(args: dict) -> AsyncGenerator[str, None]` | Async generator, each `yield` → `tool_progress` SSE, last yield → `tool_end` result |
 
-Example �?streaming handler with progress steps:
+Example — streaming handler with progress steps:
 
 ```python
 import asyncio, json
@@ -179,7 +179,7 @@ def execute(args: dict) -> ToolResult:
     )
 ```
 
-`content` is the semantic payload consumed by the LLM. `meta` holds arbitrary UI/viz data �?it is preserved in SSE events but never included in the LLM context window.
+`content` is the semantic payload consumed by the LLM. `meta` holds arbitrary UI/viz data — it is preserved in SSE events but never included in the LLM context window.
 
 Streaming handlers can also yield `ToolResult` as the final result:
 
@@ -220,10 +220,10 @@ AGENT = {
     "display_name": "Translator",
     "display_name_locale": {"zh": "翻译助手", "en": "Translator"},
     "description": "Translates text between multiple languages.",
-    "description_locale": {"zh": "在多语言之间翻译文本�?},
+    "description_locale": {"zh": "在多语言之间翻译文本。"},
     "system_prompt": "You are a professional translator.",
     "system_prompt_locale": {
-        "zh": "你是一位专业翻译。准确翻译用户文本，保留语气、风格和文化细微差别�?
+        "zh": "你是一位专业翻译。准确翻译用户文本，保留语气、风格和文化细微差别。"
     },
 }
 ```
@@ -254,7 +254,7 @@ The built FastAPI app automatically exposes:
 
 Every SSE event uses the format `data: {"type":"<event>","data":<payload>}`.
 
-**Tool execution** �?events emitted by this SDK (`tool_start` is emitted by the orchestration caller):
+**Tool execution** — events emitted by this SDK (`tool_start` is emitted by the orchestration caller):
 
 ```
 data: {"type":"tool_progress","data":"..."}                            (0 or more; one per handler yield/return)
@@ -273,7 +273,7 @@ data: {"type":"tool_end","data":{"content":"...","__meta":{...},"__stop":false}}
 data: {"type":"tool_end","data":"Validation error: ..."}
 ```
 
-**Agent run** �?events emitted by the LLM runner:
+**Agent run** — events emitted by the LLM runner:
 
 ```
 data: {"type":"agent_start",     "data":{"agent":"...","user_input":[...]}}
@@ -304,11 +304,11 @@ TOOL = {
     "display_name": "Weather Query",
     "display_name_locale": {"zh": "天气查询", "en": "Weather Query"},
     "description": "Get current weather for a city.",
-    "description_locale": {"zh": "获取某个城市的当前天气�?},
+    "description_locale": {"zh": "获取某个城市的当前天气。"},
 }
 ```
 
-`Accept-Language: zh` �?displays `天气查询`. Falls back to the base value if no match.
+`Accept-Language: zh` → displays `天气查询`. Falls back to the base value if no match.
 
 ## Configuration reference
 
@@ -376,7 +376,7 @@ service = ServiceApp(
 app = service.build()
 ```
 
-When `m2m_auth_provider` is `None` (default), POST endpoints are open (backward compatible). When set, `authenticate()` is called on every request �?return `None` for 401.
+When `m2m_auth_provider` is `None` (default), POST endpoints are open (backward compatible). When set, `authenticate()` is called on every request — return `None` for 401.
 
 ## Testing
 
