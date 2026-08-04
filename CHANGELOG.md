@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.1.2a2
+
+- chore: pin `minimal-harness>=0.8.0a2` (lockstep with publish set;
+  no SDK code change).
+
 ## 0.1.2a1
 
 - chore: pin `minimal-harness>=0.8.0a1` (lockstep with publish set)
