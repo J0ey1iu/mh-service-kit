@@ -330,8 +330,12 @@ class ServiceApp:
                     validation_error_stream(), media_type="text/event-stream"
                 )
 
-            context = ToolContext(
+            context = ToolContext.from_dict(
+                body.context,
                 headers={k.lower(): v for k, v in request.headers.items()},
+            )
+            logger.debug(
+                "tool.context.received tool=%s context=%s", tool_name, body.context
             )
             needs_context = "context" in inspect.signature(handler).parameters
 

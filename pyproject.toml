@@ -19,5 +19,8 @@ build-backend = "uv_build"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
 [tool.uv.sources]
 minimal-harness = { workspace = true }

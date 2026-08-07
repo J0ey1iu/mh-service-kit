@@ -18,6 +18,7 @@ from typing import (
 )
 
 from minimal_harness.types import (
+    ContextProvider,
     ExtraHeadersProvider,
     RemoteToolBinding,
     ToolCall,
@@ -84,6 +85,7 @@ class SSEToolExecutor:
         self._extra_headers_provider: ExtraHeadersProvider | None = (
             binding.extra_headers_provider
         )
+        self._context_provider: ContextProvider | None = binding.context_provider
         self._timeout = binding.timeout
         self._verify_ssl = binding.verify_ssl
 
@@ -93,6 +95,15 @@ class SSEToolExecutor:
             extra = await self._extra_headers_provider()
             headers.update(extra)
         return headers
+
+    async def _body(self, args: dict[str, Any], tool_call: ToolCall) -> dict[str, Any]:
+        body: dict[str, Any] = {"args": args, "tool_call": tool_call}
+        if self._context_provider is not None:
+            context = (await self._context_provider()) or {}
+            logger.debug("tool.context url=%s context=%s", self._url, context)
+            if context:
+                body["context"] = context
+        return body
 
     async def execute(
         self,
@@ -116,7 +127,7 @@ class SSEToolExecutor:
                 async with client.stream(
                     "POST",
                     self._url,
-                    json={"args": args, "tool_call": tool_call},
+                    json=await self._body(args, tool_call),
                     headers=await self._resolve_headers(),
                 ) as resp:
                     logger.debug(
@@ -224,7 +235,11 @@ class ToolServiceExecutor:
     """
 
     def __init__(
-        self, service_url: str, timeout: int = 30, verify_ssl: bool = False
+        self,
+        service_url: str,
+        timeout: int = 30,
+        verify_ssl: bool = False,
+        context_provider: ContextProvider | None = None,
     ) -> None:
         if httpx is None:
             raise ImportError(
@@ -234,6 +249,7 @@ class ToolServiceExecutor:
         self._service_url = service_url.rstrip("/")
         self._timeout = timeout
         self._verify_ssl = verify_ssl
+        self._context_provider = context_provider
 
     async def execute(
         self,
@@ -250,6 +266,17 @@ class ToolServiceExecutor:
             list(args.keys()),
         )
         result: Any = None
+        body: dict[str, Any] = {"args": args, "tool_call_id": tool_call.get("id", "")}
+        if self._context_provider is not None:
+            context = (await self._context_provider()) or {}
+            logger.debug(
+                "tool.context service=%s tool=%s context=%s",
+                self._service_url,
+                tool_name,
+                context,
+            )
+            if context:
+                body["context"] = context
         try:
             async with httpx.AsyncClient(
                 timeout=self._timeout, trust_env=False, verify=self._verify_ssl
@@ -257,7 +284,7 @@ class ToolServiceExecutor:
                 async with client.stream(
                     "POST",
                     f"{self._service_url}/tools/{tool_name}/execute",
-                    json={"args": args, "tool_call_id": tool_call.get("id", "")},
+                    json=body,
                 ) as resp:
                     logger.debug(
                         "tool.response service=%s/tools/%s status=%d",
