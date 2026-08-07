@@ -177,16 +177,21 @@ async def execute(args: dict):
 
 ### 访问 HTTP 请求上下文
 
-handler 声明 `context` 参数即可接收 `ToolContext`，包含原始请求的 header：
+handler 声明 `context` 参数即可接收 `ToolContext`，包含原始请求的 header，以及网关在请求体中转发过来的结构化上下文（用户身份、trace、locale 等）：
 
 ```python
 from mh_service_kit import ToolContext
 
 def execute(args: dict, context: ToolContext):
     auth_token = context.headers.get("authorization", "")
+    user_id = context.user_id          # 网关转发的用户标识
+    locale = context.locale            # 网关解析的语言环境
+    trace_id = context.trace_id        # 链路追踪 ID
     # 调用下游 API 时携带用户认证信息
-    return json.dumps({"result": "ok"})
+    return json.dumps({"result": "ok", "user": user_id})
 ```
+
+`ToolContext` 结构化字段：`user_id` / `username` / `roles` / `extra_data` / `trace_id` / `locale` / `scenario_id` / `agent_name` / `correlation_id`，未识别的转发字段会落入 `extra`。网关未发送的字段保持默认值，因此仅依赖 `headers` 的旧工具不受影响。
 
 ---
 

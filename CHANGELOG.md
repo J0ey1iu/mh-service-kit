@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.1.2a4
+
+- feat: forward the gateway's structured request context to tool
+  handlers. `ToolExecuteRequest` gains an optional `context` body field;
+  `ToolContext` now carries `user_id` / `username` / `roles` /
+  `extra_data` / `trace_id` / `locale` / `scenario_id` / `agent_name` /
+  `correlation_id` (unknown keys land in `extra`). `SSEToolExecutor` and
+  `ToolServiceExecutor` accept a `context_provider` and merge its result
+  into the request body; context payloads are logged at DEBUG only.
+  Header-only behavior is unchanged (backwards compatible).
+
 ## 0.1.2a3
 
 - chore: pin `minimal-harness>=0.8.0a3` (lockstep with publish set;

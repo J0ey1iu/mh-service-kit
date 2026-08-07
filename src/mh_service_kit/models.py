@@ -16,6 +16,7 @@ class AgentRunRequest(BaseModel):
 class ToolExecuteRequest(BaseModel):
     args: dict = {}
     tool_call_id: str = ""
+    context: dict = {}
 
 
 def parameters_from_model(model: type[BaseModel]) -> dict[str, Any]:
